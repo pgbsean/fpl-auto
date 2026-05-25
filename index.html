@@ -1,24 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPL Dashboard PWA</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#37003c">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body { background-color: #02efff; color: #37003c; }
-    </style>
-</head>
 <body class="bg-slate-50 font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full text-center border-t-8 border-purple-900">
-        <h1 class="text-2xl font-bold text-purple-900 mb-2">⚽ FPL Tracker PWA</h1>
+        <h1 class="text-2xl font-bold text-purple-900 mb-2">FPL Tracker PWA</h1>
         <p class="text-gray-600 mb-6 text-sm">Install this page as an app for quick access.</p>
         
         <button id="install-btn" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-full mb-6 transition dynamic-bounce">
-            ➕ Install App
+            Install App
         </button>
 
         <div class="border-t border-gray-100 pt-4">
@@ -27,58 +16,3 @@
             <div id="data-container" class="hidden text-left bg-slate-50 p-3 rounded-lg text-sm font-mono whitespace-pre-wrap"></div>
         </div>
     </div>
-
-    <script>
-        // --- 1. PWA Service Worker Registration ---
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Service Worker Registered"));
-        }
-
-        // --- 2. Handle PWA Installation Button ---
-        let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.classList.remove('hidden');
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.classList.add('hidden');
-                }
-                deferredPrompt = null;
-            }
-        });
-
-        // --- 3. Fetch Live FPL Data ---
-        // Uses a CORS proxy to bypass FPL API restrictions directly in the browser
-        async function fetchFPLData() {
-            try {
-                const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://fantasy.premierleague.com/api/bootstrap-static/'));
-                if (!response.ok) throw new Error('Network error');
-                const data = await response.json();
-                const fplData = JSON.parse(data.contents);
-                
-                // Extract current gameweek details
-                const currentGW = fplData.events.find(event => event.is_current) || fplData.events[0];
-                
-                document.getElementById('loading').classList.add('hidden');
-                const container = document.getElementById('data-container');
-                container.classList.remove('hidden');
-                container.innerText = `Gameweek: ${currentGW.name}\nStatus: Finished = ${currentGW.finished}\nAverage Score: ${currentGW.average_entry_score || 0}`;
-            } catch (error) {
-                document.getElementById('loading').innerText = "Failed to load live data.";
-                console.error(error);
-            }
-        }
-
-        fetchFPLData();
-    </script>
-</body>
-</html>
