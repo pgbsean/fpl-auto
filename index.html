@@ -16,3 +16,57 @@
             <div id="data-container" class="hidden text-left bg-slate-50 p-3 rounded-lg text-sm font-mono whitespace-pre-wrap"></div>
         </div>
     </div>
+<script>
+        // --- 1. PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log("Service Worker Registered"));
+        }
+
+        // --- 2. Handle PWA Installation Button ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // --- 3. Fetch Live FPL Data ---
+        // Uses a CORS proxy to bypass FPL API restrictions directly in the browser
+        async function fetchFPLData() {
+            try {
+                const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://fantasy.premierleague.com/api/bootstrap-static/'));
+                if (!response.ok) throw new Error('Network error');
+                const data = await response.json();
+                const fplData = JSON.parse(data.contents);
+                
+                // Extract current gameweek details
+                const currentGW = fplData.events.find(event => event.is_current) || fplData.events[0];
+                
+                document.getElementById('loading').classList.add('hidden');
+                const container = document.getElementById('data-container');
+                container.classList.remove('hidden');
+                container.innerText = `Gameweek: ${currentGW.name}\nStatus: Finished = ${currentGW.finished}\nAverage Score: ${currentGW.average_entry_score || 0}`;
+            } catch (error) {
+                document.getElementById('loading').innerText = "Failed to load live data.";
+                console.error(error);
+            }
+        }
+
+        fetchFPLData();
+    </script>
+</body>
+</html>
