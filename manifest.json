@@ -1,0 +1,16 @@
+{
+  "name": "FPL Live Companion",
+  "short_name": "FPLCompanion",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#37003c",
+  "theme_color": "#37003c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5323/5323814.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
