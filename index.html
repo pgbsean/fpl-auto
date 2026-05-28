@@ -528,7 +528,7 @@ async function fplFetch(path) {
   } catch(_) {}
 
   // CORS proxy fallback (allorigins)
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const proxy = `https://corsproxy.io/raw?url=${encodeURIComponent(url)}`;
   const r2 = await fetch(proxy);
   if (!r2.ok) throw new Error(`FPL API error: ${r2.status}`);
   return r2.json();
